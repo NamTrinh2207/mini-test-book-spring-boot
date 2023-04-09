@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,36 +38,38 @@ public class BookController {
         }
         book.setId(id);
         bookService.save(book);
-        return ResponseEntity.ok(book);
-
+        return new ResponseEntity<>(book, HttpStatus.OK);
     }
 
     //delete book
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Book> delete(@PathVariable Long id) {
         Optional<Book> bookOptional = bookService.getById(id);
         if (!bookOptional.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        bookService.delete(id);
-        return new ResponseEntity<>(HttpStatus.OK);
+        bookService.delete(bookOptional.get().getId());
+        return new ResponseEntity<>(bookOptional.get(), HttpStatus.OK);
     }
 
     // search by name, author and price
     @GetMapping("/search")
     public ResponseEntity<List<Book>> search(
-            @RequestParam(value = "name", required = false) Optional<String> name,
-            @RequestParam(value = "author", required = false) Optional<String> author,
-            @RequestParam(value = "maxPrice", required = false) Long maxPrice) {
-        if (name.isPresent()) {
-            return ResponseEntity.ok(bookService.findAllByNameContainingIgnoreCase(name.get().trim()));
-        } else if (author.isPresent()) {
-            return ResponseEntity.ok(bookService.findAllByAuthorContainingIgnoreCase(author.get().trim()));
-        } else if (maxPrice != null) {
-            return ResponseEntity.ok(bookService.findByPriceBetween(0L, maxPrice));
+            @RequestParam(value = "name") Optional<String> name,
+            @RequestParam(value = "author") Optional<String> author,
+            @RequestParam(value = "minPrice", required = false) Optional<Long> minPrice,
+            @RequestParam(value = "maxPrice", required = false) Optional<Long> maxPrice) {
+        List<Book> books;
+        if (name.isPresent() & author.isPresent() & (minPrice.isPresent() || maxPrice.isPresent())) {
+            books = bookService.findAllByNameContainingIgnoreCaseAndAuthorContainingIgnoreCaseOrPriceIsBetween(
+                    name.orElse("").trim().toLowerCase(),
+                    author.orElse("").trim().toLowerCase(),
+                    minPrice.orElse(0L),
+                    maxPrice.orElse(0L));
         } else {
-            return ResponseEntity.ok((List<Book>) bookService.getAll());
+            books = (List<Book>) bookService.getAll();
         }
+        return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
     // get total book price

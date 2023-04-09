@@ -8,9 +8,6 @@ import java.util.List;
 
 @Repository
 public interface IBookRepo extends PagingAndSortingRepository<Book, Long> {
-    List<Book> findAllByNameContainingIgnoreCase(String name);
-
-    List<Book> findAllByAuthorContainingIgnoreCase(String author);
-
-    List<Book> findByPriceBetween(Long minPrice, Long maxPrice);
+    List<Book> findByPriceIsBetween(Long minPrice, Long maxPrice);
+    List<Book> findAllByNameContainingIgnoreCaseAndAuthorContainingIgnoreCaseOrPriceIsBetween(String name, String author, Long minPrice, Long maxPrice);
 }

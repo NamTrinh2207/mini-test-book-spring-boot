@@ -34,18 +34,13 @@ public class BookService implements IBookService {
     }
 
     @Override
-    public List<Book> findAllByNameContainingIgnoreCase(String name) {
-        return bookRepo.findAllByNameContainingIgnoreCase(name);
+    public List<Book> findByPriceIsBetween(Long minPrice, Long maxPrice) {
+        return bookRepo.findByPriceIsBetween(minPrice, maxPrice);
     }
 
     @Override
-    public List<Book> findAllByAuthorContainingIgnoreCase(String author) {
-        return bookRepo.findAllByAuthorContainingIgnoreCase(author);
-    }
-
-    @Override
-    public List<Book> findByPriceBetween(Long minPrice, Long maxPrice) {
-        return bookRepo.findByPriceBetween(minPrice, maxPrice);
+    public List<Book> findAllByNameContainingIgnoreCaseAndAuthorContainingIgnoreCaseOrPriceIsBetween(String name, String author, Long minPrice, Long maxPrice) {
+        return bookRepo.findAllByNameContainingIgnoreCaseAndAuthorContainingIgnoreCaseOrPriceIsBetween(name, author, 0L, maxPrice);
     }
 
     @Override
